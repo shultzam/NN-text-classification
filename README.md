@@ -9,7 +9,7 @@ repo: github.com/shultzam/NN-text-classification
 # Description
 The ability to process and understand sentiment associated with text is a topic that impacts many facets in everyday life. In this case, with an opinion or review of services. Sentiment is much more subtle than a star rating system and is therefore harder to process. A neural network can help quantify sentiment behind a review of services given a training set. With regression, this neural network can then be judged on its accuracy with a hold-out data set.
 
-The data that will be used is hosted by the University of California, Irvine [Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets.php?format=&task=&att=&area=&numAtt=&numIns=&type=text&sort=nameUp&view=table) and is called [Sentiment Labelled Sentences](https://archive.ics.uci.edu/ml/datasets/Sentiment+Labelled+Sentences). There are 3000 total reviews evently distributed from Yelp, IMDb and Amazon, each already labelled with negative or positive sentiment. The benefit of this is that any number of the reviews can be used in a training set and can be used to show the benefit of small vs large training sets in neural networks.
+The data that will be used is hosted by the University of California, Irvine [Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets.php?format=&task=&att=&area=&numAtt=&numIns=&type=text&sort=nameUp&view=table) and is called [Sentiment Labelled Sentences](https://archive.ics.uci.edu/ml/datasets/Sentiment+Labelled+Sentences). There are 3000 total reviews evenly distributed from Yelp, IMDb and Amazon, each already labelled with negative or positive sentiment. The benefit of this is that any number of the reviews can be used in a training set and can be used to show the benefit of small versus large training sets in neural networks.
 
 I intend to use the TensorFlow API/library with Python 3.5 for my project.
 
@@ -31,6 +31,6 @@ The major milestones of this project are as follows:
 As mentioned before, I expected to be able to classify reviews sentiments as positive or negative as well as categorically with labels of food/drink, movie, product or unmentioned. With 3000 entries of data I expect to be able to use 40 or so entries as training data providing a great baseline for the neural network to learn and properly classify the data. I expect TensorFlow to have tools for analyzing the accuracy of the neural network but in the absence of those tools a regression test using the Mean Square Error method will be implemented to analyze the accuracy of the network against a hold-out data set.
 
 # Key References
-- N.A. (N.D.). TensorFlow. Retrieved from htttp://www.tensorflow.org
-- Kassabgi, G. (Jan 16, 2017). Text Classificiation using Neural Networks. Retrieved from https://machinelearnings.co/text-classification-using-neural-networks-f5cd7b8765c6
+- N.A. (N.D.). TensorFlow. Retrieved from http://www.tensorflow.org
+- Kassabgi, G. (Jan 16, 2017). Text Classification using Neural Networks. Retrieved from https://machinelearnings.co/text-classification-using-neural-networks-f5cd7b8765c6
 
