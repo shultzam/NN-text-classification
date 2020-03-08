@@ -4,13 +4,14 @@ from os import path
 from sys import exit
 from enum import Enum
 from dataclasses import dataclass
+from random import shuffle
 
 '''
 Created using Python 3.7.5.
 USAGE: ./dataset_functions.py, though these functions are intended to be imported and used elsewhere
        import via: from directory_name.file_name import function_name
-	    such as:    from dataset_functions.py import *
-                   from dataset_functions.py import read_dataset_into_memory, dirs
+	    such as:    from dataset_functions import *
+                   from dataset_functions import read_dataset_into_memory, dirs
 '''
 
 ''' Dataset related constants '''
@@ -51,6 +52,10 @@ class Review:
 '''
 Reads the dataset into memory. Stores the dataset as a list of the dataclass Review.
 Review format: sentence \t score \n
+   Returns: Three lists: 
+      review text
+      review sentiment
+      review category
 '''
 def read_dataset_into_memory() -> list:
    # Initialize a list. 
@@ -75,7 +80,7 @@ def read_dataset_into_memory() -> list:
          print('ERROR - unexpected dataset file {}. Exiting.'.format(dataFile))
          exit()
       
-      # Read each data file's reviews into memory. 
+      # Read each data file's reviews into memory.
       with open(dataFile) as dataFileObj:
          lines = []
          for line in dataFileObj:
@@ -92,11 +97,26 @@ def read_dataset_into_memory() -> list:
             else:
                print('ERROR - unexpected review sentiment for review {} in file {}. Exiting.'.format(line, dataFile))
                exit()
+               
+            # The text portion of the review will have a trailing extra space so remove it.
+            reviewText = splitLine[0].rstrip()
             
             # Organize the review text, given sentiment and review category into a Review dataclass.
-            review = Review(splitLine[0], reviewSentiment, reviewCategory)
+            review = Review(reviewText, reviewSentiment, reviewCategory)
             
             # Append the review dataclass to the list.
             reviewList.append(review)
    
-   return reviewList
+   # Shuffle the review list.
+   shuffle(reviewList)
+   
+   # Aggregate the three fields in to seperate lists. This is only being done to play nice with TensorFlow.
+   textList = []
+   sentimentList = []
+   categoryList = []
+   for review in reviewList:
+      textList.append(review.text)
+      sentimentList.append(review.sentiment.value)
+      categoryList.append(review.category.value)
+      
+   return (textList, sentimentList, categoryList)
