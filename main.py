@@ -5,7 +5,7 @@ from dataset_functions import *
 from model_functions import *
 
 '''
-Created using Python 3.7.5, TensorFlow 2.0.0 and keras 2.2.4.
+Created using Python 3.7.5, TensorFlow 2.0.1 and keras 2.2.4.
 USAGE: ./main.py
 '''
 
