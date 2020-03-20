@@ -11,7 +11,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 
 '''
-Created using Python 3.7.5, TensorFlow 2.0.0 and keras 2.2.4.
+Created using Python 3.7.5, TensorFlow 2.0.1 and keras 2.2.4.
 USAGE: ./dataset_functions.py, though these functions are intended to be imported and used elsewhere
        import via: from directory_name.file_name import function_name
 	    such as:    from dataset_functions import *
