@@ -28,7 +28,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 #    dataset[3] - list containing review sentiments as numpy categoricals (test set)
 #    dataset[4] - list containing review categories as numpy categoricals (training set)
 #    dataset[5] - list containing review categories as numpy categoricals (test set)
-dataset, maxReviewLength = read_dataset_into_memory()
+dataset, maxTokens = read_dataset_into_memory()
 
 #####################
 # Sentiment model.
@@ -36,7 +36,7 @@ dataset, maxReviewLength = read_dataset_into_memory()
 
 # Initialize the sentiment model using the maximum review length and the number of potential outputs.
 print('Building sentiment model.')
-sentimentModel = build_model(maxReviewLength, dataset[2].shape[1])
+sentimentModel = build_model(maxTokens, dataset[2].shape[1])
 
 # Print a summary of the sentiment model.
 sentimentModel.summary()
@@ -44,7 +44,12 @@ sentimentModel.summary()
 # Fit the sentiment model and test it against the test data.
 #   - epochs    : the number of iterations over the entire x and y datas to train the model.
 #   - batch_size: the number of samples per gradient update.
-sentimentModel.fit(x=dataset[0], y=dataset[2], validation_data=(dataset[1], dataset[3]), epochs=50, verbose=2, batch_size=128)
+sentimentModel.fit(x=dataset[0], y=dataset[2], validation_split=0.2, epochs=25, batch_size=128)
+
+# Determine the accuracy of the sentiment model.
+result = sentimentModel.evaluate(dataset[1], dataset[3], verbose=0)
+print()
+print("Sentiment model accuracy: {0:.2%}".format(result[1]))
 
 # Save the sentiment model.
 fileName = 'sentiment_model.h5'
@@ -63,7 +68,7 @@ print()
 
 # Initialize the category model using the maximum review length and the number of potential outputs.
 print('Building category model.')
-categoryModel = build_model(maxReviewLength, dataset[4].shape[1])
+categoryModel = build_model(maxTokens, dataset[4].shape[1])
 
 # Print a summary of the category model.
 categoryModel.summary()
@@ -71,7 +76,12 @@ categoryModel.summary()
 # Fit the category model and test it against the test data.
 #   - epochs    : the number of iterations over the entire x and y datas to train the model.
 #   - batch_size: the number of samples per gradient update.
-categoryModel.fit(x=dataset[0], y=dataset[4], validation_data=(dataset[1], dataset[5]), epochs=50, verbose=2, batch_size=128)
+categoryModel.fit(x=dataset[0], y=dataset[4], validation_split=0.2, epochs=25, batch_size=128)
+
+# Determine the accuracy of the category model.
+result = categoryModel.evaluate(dataset[1], dataset[5], verbose=0)
+print()
+print("Category model ccuracy: {0:.2%}".format(result[1]))
 
 # Save the category model.
 fileName = 'category_model.h5'

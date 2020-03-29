@@ -57,7 +57,7 @@ Reads the dataset into memory. Stores the dataset as a list of the dataclass Rev
 Tensorflow will play nice with.
 
    Review format: sentence \t score \n
-   Returns: dataset (6 lists) and maxReviewLength (for model creation)
+   Returns: dataset (6 lists) and maxTokensAllowed (for model creation)
       6 lists:
       - reviews train, reviews test
       - sentiments train, sentiments test
@@ -141,7 +141,12 @@ def read_dataset_into_memory():
    textSequences = textTokenizer.texts_to_sequences(textList)
    
    # TODO: explain
-   textData = pad_sequences(textSequences, maxlen=maxReviewLength)
+   numTokensEach = [len(tokens) for tokens in textSequences]
+   avgTokens = sum(numTokensEach) / len(numTokensEach)
+   maxTokens = int(avgTokens * 1.5)
+   
+   # TODO: explain
+   textData = pad_sequences(textSequences, maxlen=maxTokens)
    sentimentLabels = tf.keras.utils.to_categorical(np.array(sentimentList))
    categoryLabels = tf.keras.utils.to_categorical(np.array(categoryList))
    
@@ -163,4 +168,4 @@ def read_dataset_into_memory():
    # Package the dataset for returning.
    dataset = [reviews_train, reviews_test, sentiments_train, sentiments_test, categories_train, categories_test]
    
-   return dataset, maxReviewLength
+   return dataset, maxTokens
