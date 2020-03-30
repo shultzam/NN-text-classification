@@ -81,7 +81,7 @@ categoryModel.fit(x=dataset[0], y=dataset[4], validation_split=0.2, epochs=25, b
 # Determine the accuracy of the category model.
 result = categoryModel.evaluate(dataset[1], dataset[5], verbose=0)
 print()
-print("Category model ccuracy: {0:.2%}".format(result[1]))
+print("Category model accuracy: {0:.2%}".format(result[1]))
 
 # Save the category model.
 fileName = 'category_model.h5'
