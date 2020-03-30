@@ -25,9 +25,9 @@ def build_model(intputTokenCount: int, lengthOfLabels: int) -> Model:
    print('Building keras Sequential model with length of input: {}, labels length: {}'.format(intputTokenCount, 
                                                                                               lengthOfLabels))
    # Build the embedding layer which creates the weight matrix of (vocab_size) x (embedding dimension) and then indexes
-   # this weight matrix. Note that in read_dataset_into_memory() we only Tokenized the 10000 most common words so the 
+   # this weight matrix. Note that in read_dataset_into_memory() we only Tokenized the 5000 most common words so the 
    # embedding layer shall take that into account.
-   embeddingLayer = layers.Embedding(input_dim=10000, output_dim=128, input_length=intputTokenCount)
+   embeddingLayer = layers.Embedding(input_dim=5000, output_dim=128, input_length=intputTokenCount)
    sequenceInput = layers.Input(shape=(intputTokenCount,), dtype="int32")
    embeddedSequences = embeddingLayer(sequenceInput)
    
