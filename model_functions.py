@@ -32,6 +32,7 @@ def build_model(intputTokenCount: int, lengthOfLabels: int) -> Model:
    embeddedSequences = embeddingLayer(sequenceInput)
    
    # Build the model.
+   # TODO: explain
    layerInstance = layers.Conv1D(128, 1, activation='relu')(embeddedSequences)
    layerInstance = layers.MaxPooling1D(1)(layerInstance)
    layerInstance = layers.Conv1D(128, 1, activation='relu')(layerInstance)
@@ -42,12 +43,16 @@ def build_model(intputTokenCount: int, lengthOfLabels: int) -> Model:
    layerInstance = tf.expand_dims(layerInstance, axis=-1)
    layerInstance = layers.MaxPooling1D(32)(layerInstance)
    layerInstance = layers.Flatten()(layerInstance)
-   layerInstance = layers.Dense(128, activation='relu')(layerInstance)
-   
-   # Compile the model.
-   # TODO: explain
+   layerInstance = layers.Dense(128, activation='relu')(layerInstance) 
    preds = layers.Dense(lengthOfLabels, activation='softmax')(layerInstance)
+
    model = Model(sequenceInput, preds)
-   model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+   # Compile the model based on the output shape.
+   if 2 == lengthOfLabels:
+      lossFunction = 'binary_crossentropy'
+   else:
+      lossFunction = 'categorical_crossentropy'
+   model.compile(loss=lossFunction, optimizer='adam', metrics=['accuracy'])
 	
    return model
