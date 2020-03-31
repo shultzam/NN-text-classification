@@ -143,7 +143,7 @@ def read_dataset_into_memory():
    # TODO: explain
    numTokensEach = [len(tokens) for tokens in textSequences]
    avgTokens = sum(numTokensEach) / len(numTokensEach)
-   maxTokens = int(avgTokens * 1.5)
+   maxTokens = int(avgTokens * 1.2)
    
    # TODO: explain
    textData = pad_sequences(textSequences, maxlen=maxTokens)
