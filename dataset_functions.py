@@ -133,9 +133,9 @@ def read_dataset_into_memory():
       textList.append(review.text)
       sentimentList.append(review.sentiment.value)
       categoryList.append(review.category.value)
-      
+   
    # TODO: explain
-   textTokenizer = Tokenizer(num_words=10000)
+   textTokenizer = Tokenizer(num_words=5000)
    textTokenizer.fit_on_texts(textList)
    wordIndex = textTokenizer.word_index
    textSequences = textTokenizer.texts_to_sequences(textList)
@@ -143,7 +143,7 @@ def read_dataset_into_memory():
    # TODO: explain
    numTokensEach = [len(tokens) for tokens in textSequences]
    avgTokens = sum(numTokensEach) / len(numTokensEach)
-   maxTokens = int(avgTokens * 1.5)
+   maxTokens = int(avgTokens * 1.2)
    
    # TODO: explain
    textData = pad_sequences(textSequences, maxlen=maxTokens)

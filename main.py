@@ -4,10 +4,15 @@ import os
 from dataset_functions import *
 from model_functions import *
 
+# Try installing graphviz via 'apt-get install graphviz' and the packages listed in requirements.txt via 'pip3 install -r requirements.txt'.
+from tensorflow.keras.utils import plot_model
+
 '''
 Created using Python 3.7.5, TensorFlow 2.0.1 and keras 2.2.4.
 USAGE: ./main.py
 '''
+
+# TODO: add argument to determine if new model files are saved.
 
 #####################
 # Dataset functionality.
@@ -52,14 +57,17 @@ print()
 print("Sentiment model accuracy: {0:.2%}".format(result[1]))
 
 # Save the sentiment model.
-fileName = 'sentiment_model.h5'
+#TODO: functionalize.
+modelFileName = 'sentiment_model.h5'
+imageFileName = os.path.join('.', 'models', 'sentiment_model.png')
 MODELS_DIR = os.path.join(os.getcwd(), 'models')
 if not os.path.isdir(MODELS_DIR):
    os.makedirs(MODELS_DIR)
-sentimentsModelFile = os.path.join(MODELS_DIR, fileName)
+sentimentsModelFile = os.path.join(MODELS_DIR, modelFileName)
 sentimentModel.save(sentimentsModelFile)
+plot_model(sentimentModel, to_file=imageFileName, show_shapes=True, show_layer_names=True)
 print()
-print('Saved model to {}'.format(os.path.join('.', 'models', fileName)))
+print('Saved model to {} and {}'.format(os.path.join('.', 'models', modelFileName), os.path.basename(imageFileName)))
 print()
 
 #####################
@@ -84,12 +92,15 @@ print()
 print("Category model accuracy: {0:.2%}".format(result[1]))
 
 # Save the category model.
-fileName = 'category_model.h5'
+#TODO: functionalize.
+modelFileName = 'category_model.h5'
+imageFileName = os.path.join('.', 'models', 'category_model.png')
 MODELS_DIR = os.path.join(os.getcwd(), 'models')
 if not os.path.isdir(MODELS_DIR):
    os.makedirs(MODELS_DIR)
-categoriesModelFile = os.path.join(MODELS_DIR, fileName)
+categoriesModelFile = os.path.join(MODELS_DIR, modelFileName)
 categoryModel.save(categoriesModelFile)
+plot_model(categoryModel, to_file=imageFileName, show_shapes=True, show_layer_names=True)
 print()
-print('Saved model to {}'.format(os.path.join('.', 'models', fileName)))
+print('Saved model to {} and {}'.format(os.path.join('.', 'models', modelFileName), os.path.basename(imageFileName)))
 print()
