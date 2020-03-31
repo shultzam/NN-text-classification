@@ -3,12 +3,16 @@
 import os
 from dataset_functions import *
 from model_functions import *
+
+# Try installing graphviz via 'apt-get install graphviz' and the packages listed in requirements.txt via 'pip3 install -r requirements.txt'.
 from tensorflow.keras.utils import plot_model
 
 '''
 Created using Python 3.7.5, TensorFlow 2.0.1 and keras 2.2.4.
 USAGE: ./main.py
 '''
+
+# TODO: add argument to determine if new model files are saved.
 
 #####################
 # Dataset functionality.

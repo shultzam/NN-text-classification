@@ -34,15 +34,15 @@ def build_model(intputTokenCount: int, lengthOfLabels: int) -> Model:
    # Build the model.
    # TODO: explain
    layerInstance = layers.Conv1D(128, 1, activation='relu')(embeddedSequences)
-   layerInstance = layers.MaxPooling1D(1)(layerInstance)
+   #layerInstance = layers.MaxPooling1D(1)(layerInstance)
    layerInstance = layers.Conv1D(128, 1, activation='relu')(layerInstance)
-   layerInstance = layers.MaxPooling1D(1)(layerInstance)
+   #layerInstance = layers.MaxPooling1D(1)(layerInstance)
    layerInstance = layers.Conv1D(128, 1, activation='relu')(layerInstance)
    
    layerInstance = layers.LSTM(64, dropout=0.2)(layerInstance)
-   layerInstance = tf.expand_dims(layerInstance, axis=-1)
-   layerInstance = layers.MaxPooling1D(32)(layerInstance)
-   layerInstance = layers.Flatten()(layerInstance)
+   #layerInstance = tf.expand_dims(layerInstance, axis=-1)
+   #layerInstance = layers.MaxPooling1D(32)(layerInstance)
+   #layerInstance = layers.Flatten()(layerInstance)
    layerInstance = layers.Dense(128, activation='relu')(layerInstance) 
    preds = layers.Dense(lengthOfLabels, activation='softmax')(layerInstance)
 
