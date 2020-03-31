@@ -41,7 +41,7 @@ def build_model(intputTokenCount: int, lengthOfLabels: int) -> Model:
    
    layerInstance = layers.LSTM(64, dropout=0.2)(layerInstance)
    layerInstance = tf.expand_dims(layerInstance, axis=-1)
-   layerInstance = layers.MaxPooling1D(32)(layerInstance)
+   layerInstance = layers.MaxPooling1D(35)(layerInstance)
    layerInstance = layers.Flatten()(layerInstance)
    layerInstance = layers.Dense(128, activation='relu')(layerInstance) 
    preds = layers.Dense(lengthOfLabels, activation='softmax')(layerInstance)
