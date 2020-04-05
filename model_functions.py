@@ -1,16 +1,20 @@
 #!/usr/bin/python3
 
-from dataset_functions import *
+import os
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers, Model, optimizers
+
+# If this fails, Try installing graphviz via 'apt-get install graphviz' and the packages listed in requirements.txt 
+# via 'pip3 install -r requirements.txt'.
+from tensorflow.keras.utils import plot_model
 
 '''
 Created using Python 3.7.5, TensorFlow 2.0.1 and keras 2.2.4.
 USAGE: ./model_functions.py, though these functions are intended to be imported and used elsewhere
        import via: from directory_name.file_name import function_name
 	    such as:    from model_functions import *
-                   from model_functionss import read_dataset_into_memory, dirs
+                   from model_functionss import build_model
 '''
 
 '''
@@ -56,3 +60,28 @@ def build_model(intputTokenCount: int, lengthOfLabels: int) -> Model:
    model.compile(loss=lossFunction, optimizer='adam', metrics=['accuracy'])
 	
    return model
+
+'''
+Saves files associated with the model. 
+   inputs:
+      - modelObject: object of the model to be saved
+      - modelName: string identifying the name of the model
+   return:
+      - None
+'''
+def save_model_files(modelObject: Model, modelName: str):
+   # Create the models directory if neede.
+   modelsDir = os.path.join(os.getcwd(), 'models')
+   if not os.path.isdir(modelsDir):
+      os.makedirs(modelsDir)
+      
+   # Create the file paths.
+   modelFilePath = os.path.join(modelsDir, modelName + '_model.h5')
+   imageFilePath = os.path.join(modelsDir, modelName + '_model.png')
+   
+   # Save the model h5 file as well as a Keras representation of that file in a png.
+   modelObject.save(modelFilePath)
+   plot_model(modelObject, to_file=imageFilePath, show_shapes=True, show_layer_names=True)
+   print()
+   print('Saved model to {} and {}'.format(os.path.basename(modelFilePath), os.path.basename(imageFilePath)))
+   print()   
