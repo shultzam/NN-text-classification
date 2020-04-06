@@ -65,19 +65,18 @@ def build_model(intputTokenCount: int, lengthOfLabels: int) -> Model:
 Saves files associated with the model. 
    inputs:
       - modelObject: object of the model to be saved
-      - modelName: string identifying the name of the model
    return:
       - None
 '''
-def save_model_files(modelObject: Model, modelName: str):
+def save_model_files(modelObject: Model):
    # Create the models directory if neede.
    modelsDir = os.path.join(os.getcwd(), 'models')
    if not os.path.isdir(modelsDir):
       os.makedirs(modelsDir)
       
    # Create the file paths.
-   modelFilePath = os.path.join(modelsDir, modelName + '_model.h5')
-   imageFilePath = os.path.join(modelsDir, modelName + '_model.png')
+   modelFilePath = os.path.join(modelsDir, 'model.h5')
+   imageFilePath = os.path.join(modelsDir, 'model.png')
    
    # Save the model h5 file as well as a Keras representation of that file in a png.
    modelObject.save(modelFilePath)
