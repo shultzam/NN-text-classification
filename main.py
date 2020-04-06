@@ -1,18 +1,20 @@
 #!/usr/bin/python3
 
 import os
+import sys
 from dataset_functions import *
 from model_functions import *
-
-# Try installing graphviz via 'apt-get install graphviz' and the packages listed in requirements.txt via 'pip3 install -r requirements.txt'.
-from tensorflow.keras.utils import plot_model
 
 '''
 Created using Python 3.7.5, TensorFlow 2.0.1 and keras 2.2.4.
 USAGE: ./main.py
 '''
 
-# TODO: add argument to determine if new model files are saved.
+# Determine if model files are to be saved.
+SAVE_MODELS = False
+if len(sys.argv) > 1:
+   if (sys.argv[1]).lower() == 'save':
+      SAVE_MODELS = True
 
 #####################
 # Dataset functionality.
@@ -29,78 +31,33 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 # Read the dataset into memory. The following indicies rules apply to the returned dataset:
 #    dataset[0] - list containing review texts (training set)
 #    dataset[1] - list containing review texts (test set)
-#    dataset[2] - list containing review sentiments as numpy categoricals (training set)
-#    dataset[3] - list containing review sentiments as numpy categoricals (test set)
-#    dataset[4] - list containing review categories as numpy categoricals (training set)
-#    dataset[5] - list containing review categories as numpy categoricals (test set)
+#    dataset[2] - list containing review categories as numpy categoricals (training set)
+#    dataset[3] - list containing review categories as numpy categoricals (test set)
 dataset, maxTokens = read_dataset_into_memory()
 
 #####################
-# Sentiment model.
+# Train, test and evaluate the model.
 #####################
 
 # Initialize the sentiment model using the maximum review length and the number of potential outputs.
-print('Building sentiment model.')
-sentimentModel = build_model(maxTokens, dataset[2].shape[1])
+model = build_model(maxTokens, dataset[2].shape[1])
 
 # Print a summary of the sentiment model.
-sentimentModel.summary()
+model.summary()
 
 # Fit the sentiment model and test it against the test data.
 #   - epochs    : the number of iterations over the entire x and y datas to train the model.
 #   - batch_size: the number of samples per gradient update.
-sentimentModel.fit(x=dataset[0], y=dataset[2], validation_split=0.2, epochs=25, batch_size=128)
+history = model.fit(x=dataset[0], y=dataset[2], validation_split=0.2, epochs=20, batch_size=128)
+#print('TEMP | history: \n{}'.format(history.history))
 
 # Determine the accuracy of the sentiment model.
-result = sentimentModel.evaluate(dataset[1], dataset[3], verbose=0)
+result = model.evaluate(dataset[1], dataset[3], verbose=0)
 print()
 print("Sentiment model accuracy: {0:.2%}".format(result[1]))
 
-# Save the sentiment model.
-#TODO: functionalize.
-modelFileName = 'sentiment_model.h5'
-imageFileName = os.path.join('.', 'models', 'sentiment_model.png')
-MODELS_DIR = os.path.join(os.getcwd(), 'models')
-if not os.path.isdir(MODELS_DIR):
-   os.makedirs(MODELS_DIR)
-sentimentsModelFile = os.path.join(MODELS_DIR, modelFileName)
-sentimentModel.save(sentimentsModelFile)
-plot_model(sentimentModel, to_file=imageFileName, show_shapes=True, show_layer_names=True)
-print()
-print('Saved model to {} and {}'.format(os.path.join('.', 'models', modelFileName), os.path.basename(imageFileName)))
-print()
+# Save the sentiment model if deemed necessary.
+if SAVE_MODELS:
+   save_model_files(model)
 
-#####################
-# Categorical model.
-#####################
-
-# Initialize the category model using the maximum review length and the number of potential outputs.
-print('Building category model.')
-categoryModel = build_model(maxTokens, dataset[4].shape[1])
-
-# Print a summary of the category model.
-categoryModel.summary()
-
-# Fit the category model and test it against the test data.
-#   - epochs    : the number of iterations over the entire x and y datas to train the model.
-#   - batch_size: the number of samples per gradient update.
-categoryModel.fit(x=dataset[0], y=dataset[4], validation_split=0.2, epochs=25, batch_size=128)
-
-# Determine the accuracy of the category model.
-result = categoryModel.evaluate(dataset[1], dataset[5], verbose=0)
-print()
-print("Category model accuracy: {0:.2%}".format(result[1]))
-
-# Save the category model.
-#TODO: functionalize.
-modelFileName = 'category_model.h5'
-imageFileName = os.path.join('.', 'models', 'category_model.png')
-MODELS_DIR = os.path.join(os.getcwd(), 'models')
-if not os.path.isdir(MODELS_DIR):
-   os.makedirs(MODELS_DIR)
-categoriesModelFile = os.path.join(MODELS_DIR, modelFileName)
-categoryModel.save(categoriesModelFile)
-plot_model(categoryModel, to_file=imageFileName, show_shapes=True, show_layer_names=True)
-print()
-print('Saved model to {} and {}'.format(os.path.join('.', 'models', modelFileName), os.path.basename(imageFileName)))
-print()
+# TODO: create plots of training info.
