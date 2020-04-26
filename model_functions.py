@@ -2,7 +2,6 @@
 
 import os
 import tensorflow as tf
-from tensorflow import keras
 from tensorflow.keras import layers, Model, optimizers
 
 # If this fails, Try installing graphviz via 'apt-get install graphviz' and the packages listed in requirements.txt 
@@ -20,44 +19,31 @@ USAGE: ./model_functions.py, though these functions are intended to be imported 
 '''
 Builds the model to be used for sentiment classification. 
 	inputs:
-      - intputTokenCount: length of maximum input
+      - inputTokenCount: length of maximum input
       - lengthOfLabels: number of possible values for the labels
    return:
       - model: keras model, the model compiled
 '''
-def build_model(intputTokenCount: int, lengthOfLabels: int) -> Model:
-   print('Building keras Sequential model with length of input: {}, labels length: {}'.format(intputTokenCount, 
+def build_model(inputTokenCount: int, lengthOfLabels: int) -> Model:
+   print('Building keras Sequential model with length of input: {}, labels length: {}'.format(inputTokenCount, 
                                                                                               lengthOfLabels))
-   # Build the embedding layer which creates the weight matrix of (vocab_size) x (embedding dimension) and then indexes
-   # this weight matrix. Note that in read_dataset_into_memory() we only Tokenized the 5000 most common words so the 
-   # embedding layer shall take that into account.
-   embeddingLayer = layers.Embedding(input_dim=5000, output_dim=128, input_length=intputTokenCount)
-   sequenceInput = layers.Input(shape=(intputTokenCount,), dtype="int32")
-   embeddedSequences = embeddingLayer(sequenceInput)
-   
-   # Build the model.
-   # TODO: explain
-   layerInstance = layers.Conv1D(128, 1, activation='relu')(embeddedSequences)
-   #layerInstance = layers.MaxPooling1D(1)(layerInstance)
-   layerInstance = layers.Conv1D(128, 1, activation='relu')(layerInstance)
-   #layerInstance = layers.MaxPooling1D(1)(layerInstance)
-   layerInstance = layers.Conv1D(128, 1, activation='relu')(layerInstance)
-   
-   layerInstance = layers.LSTM(64, dropout=0.2)(layerInstance)
-   #layerInstance = tf.expand_dims(layerInstance, axis=-1)
-   #layerInstance = layers.MaxPooling1D(32)(layerInstance)
-   #layerInstance = layers.Flatten()(layerInstance)
-   layerInstance = layers.Dense(128, activation='relu')(layerInstance) 
-   preds = layers.Dense(lengthOfLabels, activation='softmax')(layerInstance)
-
-   model = Model(sequenceInput, preds)
-
-   # Compile the model based on the output shape.
-   if 2 == lengthOfLabels:
-      lossFunction = 'binary_crossentropy'
-   else:
-      lossFunction = 'categorical_crossentropy'
-   model.compile(loss=lossFunction, optimizer='adam', metrics=['accuracy'])
+   # The embedding layer which creates the weight matrix of (vocab_size) x (embedding dimension) and then indexes it. 
+   # Note that in read_dataset_into_memory() we only Tokenized the 2000 most common words so the embedding layer will 
+   # take that into account.
+      
+   # Initialize and compile the model.
+   #model = Model(sequenceInput, preds)
+   model = tf.keras.Sequential([
+      layers.Input(shape=(inputTokenCount,), dtype="int32"),
+      layers.Embedding(input_dim=2000, output_dim=512, input_length=inputTokenCount),
+      layers.Dropout(0.2),
+      layers.Conv1D(filters=512, kernel_size=3, padding='valid', activation='relu', strides=1),
+      layers.GlobalMaxPooling1D(),
+      layers.Dropout(0.2),
+      layers.Dense(units=256, activation='relu'),
+      layers.Dense(lengthOfLabels, activation='sigmoid')
+   ])
+   model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 	
    return model
 

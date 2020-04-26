@@ -26,32 +26,20 @@ REVIEWS_YELP = 'yelp_labelled.txt'
 DATA_FILES = [path.join(REVIEW_DIR, REVIEWS_AMAZON), 
               path.join(REVIEW_DIR, REVIEWS_IMDB), 
               path.join(REVIEW_DIR, REVIEWS_YELP)]
-
-''' Enumerator used for source identification. '''
-class ReviewSource(Enum):
-   SOURCE_AMAZON = 0
-   SOURCE_IMDB = 1
-   SOURCE_YELP = 2
-   SOURCE_UNKNOWN = 3
       
-''' Enumerator used for category identification, representing source of review and sentiment. '''
-class ReviewCategory(Enum):
-   CAT_AMAZON_NEG = 0
-   CAT_AMAZON_POS = 1
-   CAT_IMDB_NEG = 2
-   CAT_IMDB_POS = 3
-   CAT_YELP_NEG = 4
-   CAT_YELP_POS = 5
-   CAT_UNKNOWN = 6
+''' Enumerator used for sentiment identification. '''
+class ReviewSentiment(Enum):
+   SENTIMENT_NEGATIVE = 0
+   SENTIMENT_POSITIVE = 1
    
-''' C-struct like dataclass used to store the review and their category/sentiment. '''
+''' C-struct like dataclass used to store the review and their sentiment. '''
 class Review:
    text: str
-   category: ReviewCategory
+   sentiment: ReviewSentiment
       
-   def __init__(self, text: str, category: ReviewCategory):
+   def __init__(self, text: str, sentiment: ReviewSentiment):
       self.text = text
-      self.category = category
+      self.sentiment = sentiment
 
 
 '''
@@ -62,7 +50,7 @@ Tensorflow will play nice with.
    Returns: dataset (4 lists) and maxTokensAllowed (for model creation)
       4 lists:
       - reviews train, reviews test
-      - categories train, categories test
+      - sentiments train, sentiments test
 '''
 def read_dataset_into_memory():
    # Initialize a list for the reviews. 
@@ -78,18 +66,6 @@ def read_dataset_into_memory():
          print('ERROR - dataset file {} not found. Exiting.'.format(dataFile))
          exit()
          
-      # Determine the review category based on the file name.
-      reviewSource = ReviewSource.SOURCE_UNKNOWN
-      if REVIEWS_AMAZON in dataFile:
-         reviewSource = ReviewSource.SOURCE_AMAZON
-      elif REVIEWS_IMDB in dataFile:
-         reviewSource = ReviewSource.SOURCE_IMDB
-      elif REVIEWS_YELP in dataFile:
-         reviewSource = ReviewSource.SOURCE_YELP
-      else:
-         print('ERROR - unexpected dataset file {}. Exiting.'.format(dataFile))
-         exit()
-         
       # Read each data file's reviews into memory.
       print('Reading review file {} into memory..'.format(dataFile))
       with open(dataFile) as dataFileObj:
@@ -100,7 +76,14 @@ def read_dataset_into_memory():
             
             # Split the line on the tab character and assign the sentiment to an enum.
             splitLine = line.split('\t')
-            reviewCategory = determine_review_category(reviewSource, splitLine)
+            reviewSentiment = -5
+            if 0 == int(splitLine[1]):
+               reviewSentiment = ReviewSentiment.SENTIMENT_NEGATIVE
+            elif 1 == int(splitLine[1]):
+               reviewSentiment = ReviewSentiment.SENTIMENT_POSITIVE
+            else:
+               print('ERROR - Unknown sentiment: {}'.format(int(splitLine[1])))
+               exit()
                
             # The text portion of the review will have a trailing extra space so remove it.
             reviewText = splitLine[0].rstrip()
@@ -110,8 +93,8 @@ def read_dataset_into_memory():
             if currentReviewLength > maxReviewLength:
                maxReviewLength = currentReviewLength
             
-            # Organize the review text, given sentiment and review category into a Review dataclass.
-            review = Review(reviewText, reviewCategory)
+            # Organize the review text, given sentiment and review sentiment into a Review dataclass.
+            review = Review(reviewText, reviewSentiment)
             
             # Append the review dataclass to the list.
             reviewList.append(review)
@@ -121,69 +104,39 @@ def read_dataset_into_memory():
             
    # Aggregate the fields in to two seperate lists. This is only being done to play nice with TensorFlow.
    textList = []
-   categoryList = []
+   sentimentList = []
    for review in reviewList:
       textList.append(review.text)
-      categoryList.append(review.category.value)
+      sentimentList.append(review.sentiment.value)
    
    # TODO: explain
-   textTokenizer = Tokenizer(num_words=5000)
+   textTokenizer = Tokenizer(num_words=2000, lower=True)
    textTokenizer.fit_on_texts(textList)
    wordIndex = textTokenizer.word_index
    textSequences = textTokenizer.texts_to_sequences(textList)
    
    # TODO: explain
-   numTokensEach = [len(tokens) for tokens in textSequences]
-   avgTokens = sum(numTokensEach) / len(numTokensEach)
-   maxTokens = int(avgTokens * 1.2)
-   
+   tokensEach = [len(tokens) for tokens in textSequences]
+   avgTokens = sum(tokensEach) / len(tokensEach)
+   maxTokens = int(avgTokens * 1.5)
+ 
    # TODO: explain
-   textData = pad_sequences(textSequences, maxlen=maxTokens)
-   categoryLabels = tf.keras.utils.to_categorical(np.array(categoryList))
+   textData = pad_sequences(sequences=textSequences, maxlen=maxTokens, padding='post')
+   sentimentLabels = tf.keras.utils.to_categorical(np.array(sentimentList))
    
    # Print shape of lists.
    print('')
    print('reviews list shape   : {}'.format(textData.shape))
-   print('categories list shape: {}'.format(categoryLabels.shape))
+   print('sentiments list shape: {}'.format(sentimentLabels.shape))
    print('')
    
-   # Split the reviews, sentiments and categories lists into 2400:600 (80:20) ratios for train:test.
-   reviews_train, reviews_test, categories_train, categories_test = train_test_split(textData,
-                                                                                     categoryLabels,
-                                                                                     test_size = 0.2,
+   # Split the reviews and sentiments lists into 2400:600 (80:20) ratios for train:test.
+   reviews_train, reviews_test, sentiments_train, sentiments_test = train_test_split(textData,
+                                                                                     sentimentLabels,
+                                                                                     test_size=0.2,
                                                                                      shuffle=False)
    
    # Package the dataset for returning.
-   dataset = [reviews_train, reviews_test, categories_train, categories_test]
+   dataset = [reviews_train, reviews_test, sentiments_train, sentiments_test]
    
    return dataset, maxTokens
-
-
-'''
-Helper function for read_dataset_into_memory. Used to determinet he proper category for the review in question.
-   inputs:
-      - source: ReviewSource value
-      - lineTokens: tokenized review string
-   return:
-      - model: keras model, the model compiled
-'''
-def determine_review_category(source: ReviewSource, lineTokens: list) -> ReviewCategory:
-   # Obtain the sentiment of the review of interest.
-   reviewSentiment = int(lineTokens[1])
-   
-   if source == ReviewSource.SOURCE_AMAZON and 0 == reviewSentiment:
-      return ReviewCategory.CAT_AMAZON_NEG
-   elif source == ReviewSource.SOURCE_AMAZON and 1 == reviewSentiment:
-      return ReviewCategory.CAT_AMAZON_POS
-   elif source == ReviewSource.SOURCE_IMDB and 0 == reviewSentiment:
-      return ReviewCategory.CAT_IMDB_NEG
-   elif source == ReviewSource.SOURCE_IMDB and 1 == reviewSentiment:
-      return ReviewCategory.CAT_IMDB_POS
-   elif source == ReviewSource.SOURCE_YELP and 0 == reviewSentiment:
-      return ReviewCategory.CAT_YELP_NEG
-   elif source == ReviewSource.SOURCE_YELP and 1 == reviewSentiment:
-      return ReviewCategory.CAT_YELP_POS
-   
-   # If none of the above events trigger then this function has failed and the program should exit.
-   print('ERROR - unexpected review category source or sentiment from review: {}. Exiting.'.format(' '.join(lineTokens)))
-   exit()
