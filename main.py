@@ -12,11 +12,16 @@ Created using Python 3.7.5, TensorFlow 2.0.1 and keras 2.2.4.
 USAGE: ./main.py
 '''
 
-# Determine if model files are to be saved.
+#####################
+# Parse commandline argument to determine if the model or plots are created and saved.
+#####################
 SAVE_MODEL = False
-if len(sys.argv) > 1:
-   if (sys.argv[1]).lower() == 'save':
+SAVE_PLOT  = False
+for arg in sys.argv:
+   if 'model' == arg.lower():
       SAVE_MODEL = True
+   elif 'plot' == arg.lower():
+      SAVE_PLOT = True
 
 #####################
 # Dataset functionality.
@@ -32,10 +37,10 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 # Read the dataset into memory. The following indicies rules apply to the returned dataset:
 #    dataset[0] - list containing review texts (training set)
-#    dataset[1] - list containing review texts (test set)
+#    dataset[1] - list containing review texts (validate set)
 #    dataset[2] - list containing review categories as numpy categoricals (training set)
-#    dataset[3] - list containing review categories as numpy categoricals (test set)
-dataset, maxTokens = read_dataset_into_memory()
+#    dataset[3] - list containing review categories as numpy categoricals (validate set)
+dataset, maxTokens, validateReviewsText, sentenceData = read_dataset_into_memory()
 
 #####################
 # Train, test and evaluate the model.
@@ -43,19 +48,6 @@ dataset, maxTokens = read_dataset_into_memory()
 
 # Initialize the sentiment model using the maximum review length and the number of potential outputs.
 model = build_model(maxTokens, dataset[2].shape[1])
-
-# Print the output of each layer.
-#model_input = model.input
-#print('TEMP | model_input: {}'.format(model_input))
-#layer_outputs = [layer.output for layer in model.layers]
-#print('TEMP | layer_outputs: {}'.format(layer_outputs))
-#functors = [kback.function([model_input], [output]) for output in layer_outputs]
-#print('TEMP | functors: {}'.format(functors))
-
-# Test the outputs.
-#test = np.random.random(dataset[0].shape[0])[np.newaxis,...]
-#layer_outs = [func([test]) for func in functors]
-#print('TEMP | layer_outs: {}, len(layer_outs): {}'.format(layer_outs, len(layer_outs)))
 
 # Print a summary of the sentiment model.
 model.summary()
@@ -68,11 +60,52 @@ history = model.fit(x=dataset[0], y=dataset[2], validation_split=0.2, epochs=30,
 
 # Determine the accuracy of the sentiment model.
 result = model.evaluate(dataset[1], dataset[3], verbose=0)
-print()
-print("Model accuracy: {0:.2%}".format(result[1]))
+print('\nModel accuracy: {0:.2%}'.format(result[1]))
+
+#####################
+# Use the model to make predictions on the validation set.
+#####################
+
+# Allow the model to predict against each input.
+predictions = model.predict(dataset[1])
+
+# Collect the predictions for 10 reviews that were very correct, very incorrect and very confusing to the model.
+# Split down the middle if possible for positive/negative sentiment.
+correctList, incorrectList, confusingList = gather_interesting_reviews(predictions,
+                                                                       validateReviewsText,
+                                                                       dataset[3])
+
+print('\n{} correct predictions:'.format(len(correctList)))
+for item in correctList:
+   print('   {}, {}, {}'.format(item.text, item.confidence, item.sentiment))
+   
+print('\n{} incorrect predictions:'.format(len(incorrectList)))
+for item in incorrectList:
+   print('   {}, {}, {}'.format(item.text, item.confidence, item.sentiment))
+
+print('\n{} confused predictions:'.format(len(confusingList)))
+for item in confusingList:
+   print('   {}, {}, {}'.format(item.text, item.confidence, item.sentiment))
+
+#####################
+# Use the model to make predictions on a set of reviews carefully crafted to lack any sentiment.
+#####################
+
+# Allow the model to predict against each input.
+predictions = model.predict(sentenceData[0])
+print('\nsentimentless predictions:')
+for index in range(0, len(predictions)):
+   print('   {}: {}'.format(sentenceData[1][index], predictions[index]))
+
+#####################
+# If prompted, save the model image and plot.
+#####################
 
 # Save the sentiment model if deemed necessary.
 if SAVE_MODEL:
    save_model_files(model)
 
-# TODO: create plots of training info.
+# TODO: create plot of fitting info.
+if SAVE_PLOT:
+   # TODO
+   pass

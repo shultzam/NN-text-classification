@@ -26,13 +26,14 @@ REVIEWS_YELP = 'yelp_labelled.txt'
 DATA_FILES = [path.join(REVIEW_DIR, REVIEWS_AMAZON), 
               path.join(REVIEW_DIR, REVIEWS_IMDB), 
               path.join(REVIEW_DIR, REVIEWS_YELP)]
+NO_SENTIMENT_SENTENCES = path.join('sentiment_lacking_sentences', 'sentimentless_sentences.txt')
       
 ''' Enumerator used for sentiment identification. '''
 class ReviewSentiment(Enum):
    SENTIMENT_NEGATIVE = 0
    SENTIMENT_POSITIVE = 1
    
-''' C-struct like dataclass used to store the review and their sentiment. '''
+''' C-struct like class used to store the review and their sentiment. '''
 class Review:
    text: str
    sentiment: ReviewSentiment
@@ -41,23 +42,41 @@ class Review:
       self.text = text
       self.sentiment = sentiment
 
-
+''' C-struct like class used to store the review, the prediction confidence and the actual sentiment. '''
+class ReviewWithPrediction:
+   text: str
+   confidence: float
+   sentiment: bool
+      
+   def __init__(self, text: str, confidence: float, sentiment: bool):
+      self.text = text
+      self.confidence = confidence
+      self.sentiment = sentiment
+      
 '''
 Reads the dataset into memory. Stores the dataset as a list of the dataclass Review before converting into something
 Tensorflow will play nice with.
 
    Review format: sentence \t score \n
-   Returns: dataset (4 lists) and maxTokensAllowed (for model creation)
-      4 lists:
-      - reviews train, reviews test
-      - sentiments train, sentiments test
+   
+   Returns: 
+      - dataset (4 lists):
+         - dataset[0]: reviews train
+         - dataset[1]: reviews test
+         - dataset[2]: sentiments train
+         - dataset[3]: sentiments test
+      - maxTokensAllowed 
+         * for model creation
+      - validationReviewsText
+         * for use in main.py for predictions
+      - sentenceData -
+         - serialized and 
+         -
+         * for use in main.py for predictions
 '''
 def read_dataset_into_memory():
    # Initialize a list for the reviews. 
    reviewList = []
-   
-   # Track the maximum length of a review. Used later with Tensorflow operations.
-   maxReviewLength = 0
    
    # Loop through each review file.
    for dataFile in DATA_FILES:
@@ -88,12 +107,7 @@ def read_dataset_into_memory():
             # The text portion of the review will have a trailing extra space so remove it.
             reviewText = splitLine[0].rstrip()
             
-            # Update the maxReviewLength if necessary.
-            currentReviewLength = len(reviewText)
-            if currentReviewLength > maxReviewLength:
-               maxReviewLength = currentReviewLength
-            
-            # Organize the review text, given sentiment and review sentiment into a Review dataclass.
+            # Organize the review text and review sentiment into a Review dataclass.
             review = Review(reviewText, reviewSentiment)
             
             # Append the review dataclass to the list.
@@ -112,7 +126,6 @@ def read_dataset_into_memory():
    # TODO: explain
    textTokenizer = Tokenizer(num_words=2000, lower=True)
    textTokenizer.fit_on_texts(textList)
-   wordIndex = textTokenizer.word_index
    textSequences = textTokenizer.texts_to_sequences(textList)
    
    # TODO: explain
@@ -136,7 +149,135 @@ def read_dataset_into_memory():
                                                                                      test_size=0.2,
                                                                                      shuffle=False)
    
+   # Convert the reviews_test list back to text for prediction use in main.py.
+   validateReviewsText = textTokenizer.sequences_to_texts(reviews_test)
+   
    # Package the dataset for returning.
    dataset = [reviews_train, reviews_test, sentiments_train, sentiments_test]
    
-   return dataset, maxTokens
+   # Process the sentiment-less files.
+   sentimentlessList = []
+   
+   # Verify that the review files exist.
+   if not path.isfile(NO_SENTIMENT_SENTENCES):
+      print('ERROR - dataset file {} not found. Exiting.'.format(NO_SENTIMENT_SENTENCES))
+      exit()
+      
+   # Read the sentences into memory.
+   print('Reading sentimentless file {} into memory..'.format(NO_SENTIMENT_SENTENCES))
+   with open(NO_SENTIMENT_SENTENCES) as dataFileObj:
+      lines = []
+      for line in dataFileObj:
+         # Remove the newline from the sentence.
+         sentenceText = line.replace('\n', '')
+
+         # The text portion of the sentence will have a trailing extra space so remove it.
+         sentenceText = sentenceText.rstrip()
+
+         # Append the sentence dataclass to the list.
+         sentimentlessList.append(sentenceText)
+   
+   # TODO: explain. Using the same sequence fitting from the reviews.
+   sentenceSequences = textTokenizer.texts_to_sequences(sentimentlessList)
+   
+   # TODO: explain
+   tokensEach = [len(tokens) for tokens in sentenceSequences]
+   avgSentenceTokens = sum(tokensEach) / len(tokensEach)
+   maxSentenceTokens = int(avgTokens * 1.5)
+ 
+   # TODO: explain
+   paddedSentenceSequences = pad_sequences(sequences=sentenceSequences, maxlen=maxSentenceTokens, padding='post')
+   
+   # Package the sentences data for returning.
+   sentenceData = [paddedSentenceSequences, sentimentlessList]
+   
+   return dataset, maxTokens, validateReviewsText, sentenceData
+
+'''
+Gathers some reviews that the model was very correct, very incorrect or very confused about.
+   inputs:
+      - predictionList: list of prediction weights from model.predict() 
+         -in format [[negativeConfidence0, positiveConfidence0], negativeConfidenceN, positiveConfidenceN]
+      - reviewTexts: serialized review strings 
+         - in format [[review0], .. [reviewN]]
+      - actualSentiments: list of actual review sentiments 
+         - in format [[0.0, 1.0], .. [1.0, 0.0]]
+   returns:
+      - correctList of ReviewWithPrediction objects
+      - incorrectList ReviewWithPrediction objects
+      - confusedList ReviewWithPrediction objects
+'''
+def gather_interesting_reviews(predictionList: list, reviewTexts: list, actualSentiments: list):
+   # Initialize some lists.
+   correctList = []
+   incorrectList = []
+   confusedList = []
+   
+   # Gather the correctList items.
+   positiveCount = 0
+   negativeCount = 0
+   for index in range (0, len(predictionList)):
+      # Locally save some fields.
+      prediction = predictionList[index]
+      actual = actualSentiments[index]
+
+      # If the sentiment was false and the model was super sure, save this review.
+      if (prediction[0] > 0.985) and (actual[0] == 1.0) and (negativeCount < 5):
+         correctList.append(ReviewWithPrediction(reviewTexts[index], prediction[0], False))
+         negativeCount += 1
+         continue
+      elif (prediction[1] > 0.985) and (actual[1] == 1.0) and (positiveCount < 5):
+         correctList.append(ReviewWithPrediction(reviewTexts[index], prediction[1], False))
+         positiveCount += 1
+         continue
+
+      # If 10 correct items were found, break.
+      if (len(correctList) >= 10):
+         break
+         
+   # Gather the incorrectList items.
+   positiveCount = 0
+   negativeCount = 0
+   for index in range (0, len(predictionList)):
+      # Locally save some fields.
+      prediction = predictionList[index]
+      actual = actualSentiments[index]
+
+      # If the sentiment was false and the model was super sure, save this review.
+      if (prediction[0] > 0.985) and (actual[1] == 1.0) and (negativeCount < 5):
+         incorrectList.append(ReviewWithPrediction(reviewTexts[index], prediction[0], False))
+         negativeCount += 1
+         continue
+      elif (prediction[1] > 0.985) and (actual[0] == 1.0) and (positiveCount < 5):
+         incorrectList.append(ReviewWithPrediction(reviewTexts[index], prediction[1], False))
+         positiveCount += 1
+         continue
+
+      # If 10 correct items were found, break.
+      if (len(incorrectList) >= 10):
+         break
+         
+   # Gather the confusedList items.
+   positiveCount = 0
+   negativeCount = 0
+   for index in range (0, len(predictionList)):
+      # Locally save some fields.
+      prediction = predictionList[index]
+      actual = actualSentiments[index]
+
+      # If the sentiment was false and the model was super sure, save this review.
+      if (0.3 <= prediction[0] <= 0.7) and (actual[1] == 1.0) and (negativeCount < 7):
+         confusedList.append(ReviewWithPrediction(reviewTexts[index], prediction[0], False))
+         negativeCount += 1
+         continue
+      elif (0.3 <= prediction[1] <= 0.7) and (actual[0] == 1.0) and (positiveCount < 7):
+         confusedList.append(ReviewWithPrediction(reviewTexts[index], prediction[1], False))
+         positiveCount += 1
+         continue
+
+      # If 10 correct items were found, break.
+      if (len(confusedList) >= 10):
+         break
+         
+   # Return the lists.
+   return correctList, incorrectList, confusedList
