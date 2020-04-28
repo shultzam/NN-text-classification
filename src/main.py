@@ -102,10 +102,10 @@ for index in range(0, len(predictions)):
 # If prompted, save the model image and plot.
 #####################
 
-# Save the sentiment model if deemed necessary.
+# Save the model if prompted.
 if SAVE_MODEL:
    save_model_files(model)
 
-# TODO: create plot of fitting info.
+# Save the plot if prompted.
 if SAVE_PLOT:
    save_plot_file(history.history, accuracy)

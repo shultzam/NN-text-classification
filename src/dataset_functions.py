@@ -123,17 +123,18 @@ def read_dataset_into_memory():
       textList.append(review.text)
       sentimentList.append(review.sentiment.value)
    
-   # TODO: explain
+   # Create a tokenizer based on the 2000 most common words in review texts. Then sequence it.
    textTokenizer = Tokenizer(num_words=2000, lower=True)
    textTokenizer.fit_on_texts(textList)
    textSequences = textTokenizer.texts_to_sequences(textList)
    
-   # TODO: explain
+   # Determine the average token count amongst the reviews so that shorter can be padded and longer
+   # can be truncated,
    tokensEach = [len(tokens) for tokens in textSequences]
    avgTokens = sum(tokensEach) / len(tokensEach)
    maxTokens = int(avgTokens * 1.5)
  
-   # TODO: explain
+   # Pad sequences so that each review is the same 'length' in tokens.
    textData = pad_sequences(sequences=textSequences, maxlen=maxTokens, padding='post')
    sentimentLabels = tf.keras.utils.to_categorical(np.array(sentimentList))
    
@@ -177,16 +178,13 @@ def read_dataset_into_memory():
          # Append the sentence dataclass to the list.
          sentimentlessList.append(sentenceText)
    
-   # TODO: explain. Using the same sequence fitting from the reviews.
+   # Create a tokenizer based on the 2000 most common words in review texts. Then sequence it. 
+   # Note that the sentimentless sentences are sequenced using the sequence fitting from the reviews.
    sentenceSequences = textTokenizer.texts_to_sequences(sentimentlessList)
-   
-   # TODO: explain
-   tokensEach = [len(tokens) for tokens in sentenceSequences]
-   avgSentenceTokens = sum(tokensEach) / len(tokensEach)
-   maxSentenceTokens = int(avgTokens * 1.5)
  
-   # TODO: explain
-   paddedSentenceSequences = pad_sequences(sequences=sentenceSequences, maxlen=maxSentenceTokens, padding='post')
+   # Pad sequences so that each sentence is the same 'length' in tokens. Same token count as the reviews so that 
+   # predictions are possible.
+   paddedSentenceSequences = pad_sequences(sequences=sentenceSequences, maxlen=maxTokens, padding='post')
    
    # Package the sentences data for returning.
    sentenceData = [paddedSentenceSequences, sentimentlessList]
