@@ -1,193 +1,161 @@
-Tensorflow version: 2.0.1, keras version: 2.2.4-tf
+root@DESKTOP-NDS1020:~/school/ece5268/NN-text-classification/src# ./main.py model plot
+Tensorflow version: 2.1.0, keras version: 2.2.4-tf
 
-Reading review file sentiment_labelled_sentences/amazon_cells_labelled.txt into memory..
-Reading review file sentiment_labelled_sentences/imdb_labelled.txt into memory..
-Reading review file sentiment_labelled_sentences/yelp_labelled.txt into memory..
+Reading review file /root/school/ece5268/NN-text-classification/src/../sentiment_labelled_sentences/amazon_cells_labelled.txt into memory..
+Reading review file /root/school/ece5268/NN-text-classification/src/../sentiment_labelled_sentences/imdb_labelled.txt into memory..
+Reading review file /root/school/ece5268/NN-text-classification/src/../sentiment_labelled_sentences/yelp_labelled.txt into memory..
 
-reviews list shape   : (3000, 17)
+reviews list shape   : (3000, 16)
 sentiments list shape: (3000, 2)
-categories list shape: (3000, 3)
 
-Building sentiment model.
-Building keras Sequential model with length of input: 17, labels length: 2
-Model: "model"
+Reading sentimentless file /root/school/ece5268/NN-text-classification/src/../sentiment_lacking_sentences/sentimentless_sentences.txt into memory..
+Building keras Sequential model with length of input: 16, labels length: 2
+2020-04-27 20:53:14.374391: E tensorflow/stream_executor/cuda/cuda_driver.cc:351] failed call to cuInit: CUDA_ERROR_NO_DEVICE: no CUDA-capable device is detected
+Model: "sequential"
 _________________________________________________________________
 Layer (type)                 Output Shape              Param #
 =================================================================
-input_1 (InputLayer)         [(None, 17)]              0
+embedding (Embedding)        (None, 16, 512)           1024000
 _________________________________________________________________
-embedding (Embedding)        (None, 17, 128)           1280000
+dropout (Dropout)            (None, 16, 512)           0
 _________________________________________________________________
-conv1d (Conv1D)              (None, 17, 128)           16512
+conv1d (Conv1D)              (None, 14, 512)           786944
 _________________________________________________________________
-max_pooling1d (MaxPooling1D) (None, 17, 128)           0
+global_max_pooling1d (Global (None, 512)               0
 _________________________________________________________________
-conv1d_1 (Conv1D)            (None, 17, 128)           16512
+dropout_1 (Dropout)          (None, 512)               0
 _________________________________________________________________
-max_pooling1d_1 (MaxPooling1 (None, 17, 128)           0
+dense (Dense)                (None, 256)               131328
 _________________________________________________________________
-conv1d_2 (Conv1D)            (None, 17, 128)           16512
-_________________________________________________________________
-lstm (LSTM)                  (None, 64)                49408
-_________________________________________________________________
-tf_op_layer_ExpandDims (Tens [(None, 64, 1)]           0
-_________________________________________________________________
-max_pooling1d_2 (MaxPooling1 (None, 2, 1)              0
-_________________________________________________________________
-flatten (Flatten)            (None, 2)                 0
-_________________________________________________________________
-dense (Dense)                (None, 128)               384
-_________________________________________________________________
-dense_1 (Dense)              (None, 2)                 258
+dense_1 (Dense)              (None, 2)                 514
 =================================================================
-Total params: 1,379,586
-Trainable params: 1,379,586
+Total params: 1,942,786
+Trainable params: 1,942,786
 Non-trainable params: 0
 _________________________________________________________________
 Train on 1920 samples, validate on 480 samples
-Epoch 1/25
-1920/1920 [==============================] - 3s 1ms/sample - loss: 0.6935 - accuracy: 0.5005 - val_loss: 0.6930 - val_accuracy: 0.5063
-Epoch 2/25
-1920/1920 [==============================] - 1s 284us/sample - loss: 0.6926 - accuracy: 0.5005 - val_loss: 0.6913 - val_accuracy: 0.5063
-Epoch 3/25
-1920/1920 [==============================] - 1s 306us/sample - loss: 0.6814 - accuracy: 0.5005 - val_loss: 0.6648 - val_accuracy: 0.5208
-Epoch 4/25
-1920/1920 [==============================] - 1s 297us/sample - loss: 0.5868 - accuracy: 0.7443 - val_loss: 0.6208 - val_accuracy: 0.6771
-Epoch 5/25
-1920/1920 [==============================] - 1s 302us/sample - loss: 0.4315 - accuracy: 0.9151 - val_loss: 0.6097 - val_accuracy: 0.7354
-Epoch 6/25
-1920/1920 [==============================] - 1s 273us/sample - loss: 0.2709 - accuracy: 0.9583 - val_loss: 0.5874 - val_accuracy: 0.7333
-Epoch 7/25
-1920/1920 [==============================] - 1s 289us/sample - loss: 0.1571 - accuracy: 0.9708 - val_loss: 0.5995 - val_accuracy: 0.7646
-Epoch 8/25
-1920/1920 [==============================] - 1s 279us/sample - loss: 0.1009 - accuracy: 0.9755 - val_loss: 0.6599 - val_accuracy: 0.7604
-Epoch 9/25
-1920/1920 [==============================] - 0s 250us/sample - loss: 0.0737 - accuracy: 0.9839 - val_loss: 0.8237 - val_accuracy: 0.7604
-Epoch 10/25
-1920/1920 [==============================] - 1s 296us/sample - loss: 0.0658 - accuracy: 0.9859 - val_loss: 0.8219 - val_accuracy: 0.7708
-Epoch 11/25
-1920/1920 [==============================] - 1s 282us/sample - loss: 0.0586 - accuracy: 0.9875 - val_loss: 0.7794 - val_accuracy: 0.7812
-Epoch 12/25
-1920/1920 [==============================] - 1s 286us/sample - loss: 0.0507 - accuracy: 0.9880 - val_loss: 0.7800 - val_accuracy: 0.7812
-Epoch 13/25
-1920/1920 [==============================] - 1s 298us/sample - loss: 0.0449 - accuracy: 0.9880 - val_loss: 0.8403 - val_accuracy: 0.7542
-Epoch 14/25
-1920/1920 [==============================] - 1s 291us/sample - loss: 0.0460 - accuracy: 0.9870 - val_loss: 0.8098 - val_accuracy: 0.7771
-Epoch 15/25
-1920/1920 [==============================] - 1s 307us/sample - loss: 0.0389 - accuracy: 0.9885 - val_loss: 0.8829 - val_accuracy: 0.7729
-Epoch 16/25
-1920/1920 [==============================] - 1s 285us/sample - loss: 0.0320 - accuracy: 0.9901 - val_loss: 0.9517 - val_accuracy: 0.7604
-Epoch 17/25
-1920/1920 [==============================] - 1s 293us/sample - loss: 0.0248 - accuracy: 0.9948 - val_loss: 0.9687 - val_accuracy: 0.7458
-Epoch 18/25
-1920/1920 [==============================] - 1s 285us/sample - loss: 0.0215 - accuracy: 0.9948 - val_loss: 1.0211 - val_accuracy: 0.7417
-Epoch 19/25
-1920/1920 [==============================] - 1s 317us/sample - loss: 0.0185 - accuracy: 0.9958 - val_loss: 1.0529 - val_accuracy: 0.7479
-Epoch 20/25
-1920/1920 [==============================] - 1s 287us/sample - loss: 0.0168 - accuracy: 0.9953 - val_loss: 1.1004 - val_accuracy: 0.7479
-Epoch 21/25
-1920/1920 [==============================] - 1s 279us/sample - loss: 0.0182 - accuracy: 0.9948 - val_loss: 1.0614 - val_accuracy: 0.7583
-Epoch 22/25
-1920/1920 [==============================] - 1s 270us/sample - loss: 0.0163 - accuracy: 0.9969 - val_loss: 1.1430 - val_accuracy: 0.7458
-Epoch 23/25
-1920/1920 [==============================] - 1s 268us/sample - loss: 0.0167 - accuracy: 0.9948 - val_loss: 1.0970 - val_accuracy: 0.7500
-Epoch 24/25
-1920/1920 [==============================] - 1s 288us/sample - loss: 0.0119 - accuracy: 0.9969 - val_loss: 1.1479 - val_accuracy: 0.7500
-Epoch 25/25
-1920/1920 [==============================] - 1s 272us/sample - loss: 0.0111 - accuracy: 0.9969 - val_loss: 1.1919 - val_accuracy: 0.7542
+Epoch 1/30
+1920/1920 [==============================] - 2s 1ms/sample - loss: 0.6878 - accuracy: 0.5380 - val_loss: 0.6712 - val_accuracy: 0.6135
+Epoch 2/30
+1920/1920 [==============================] - 1s 747us/sample - loss: 0.5750 - accuracy: 0.7654 - val_loss: 0.5304 - val_accuracy: 0.7500
+Epoch 3/30
+1920/1920 [==============================] - 1s 773us/sample - loss: 0.3159 - accuracy: 0.8956 - val_loss: 0.4314 - val_accuracy: 0.8146
+Epoch 4/30
+1920/1920 [==============================] - 1s 736us/sample - loss: 0.1530 - accuracy: 0.9458 - val_loss: 0.4899 - val_accuracy: 0.8104
+Epoch 5/30
+1920/1920 [==============================] - 1s 744us/sample - loss: 0.0723 - accuracy: 0.9812 - val_loss: 0.5632 - val_accuracy: 0.8010
+Epoch 6/30
+1920/1920 [==============================] - 1s 758us/sample - loss: 0.0355 - accuracy: 0.9924 - val_loss: 0.6404 - val_accuracy: 0.7969
+Epoch 7/30
+1920/1920 [==============================] - 1s 768us/sample - loss: 0.0180 - accuracy: 0.9974 - val_loss: 0.6624 - val_accuracy: 0.8021
+Epoch 8/30
+1920/1920 [==============================] - 1s 745us/sample - loss: 0.0117 - accuracy: 0.9984 - val_loss: 0.7146 - val_accuracy: 0.7958
+Epoch 9/30
+1920/1920 [==============================] - 1s 772us/sample - loss: 0.0069 - accuracy: 0.9990 - val_loss: 0.7634 - val_accuracy: 0.7969
+Epoch 10/30
+1920/1920 [==============================] - 1s 747us/sample - loss: 0.0047 - accuracy: 0.9995 - val_loss: 0.8005 - val_accuracy: 0.7948
+Epoch 11/30
+1920/1920 [==============================] - 2s 786us/sample - loss: 0.0029 - accuracy: 1.0000 - val_loss: 0.8306 - val_accuracy: 0.7927
+Epoch 12/30
+1920/1920 [==============================] - 1s 760us/sample - loss: 0.0021 - accuracy: 0.9995 - val_loss: 0.8584 - val_accuracy: 0.7969
+Epoch 13/30
+1920/1920 [==============================] - 1s 768us/sample - loss: 0.0013 - accuracy: 1.0000 - val_loss: 0.8847 - val_accuracy: 0.7990
+Epoch 14/30
+1920/1920 [==============================] - 2s 797us/sample - loss: 0.0011 - accuracy: 1.0000 - val_loss: 0.9125 - val_accuracy: 0.7917
+Epoch 15/30
+1920/1920 [==============================] - 1s 759us/sample - loss: 7.7805e-04 - accuracy: 1.0000 - val_loss: 0.9329 - val_accuracy: 0.8021
+Epoch 16/30
+1920/1920 [==============================] - 1s 771us/sample - loss: 6.5811e-04 - accuracy: 1.0000 - val_loss: 0.9549 - val_accuracy: 0.8042
+Epoch 17/30
+1920/1920 [==============================] - 1s 760us/sample - loss: 5.6584e-04 - accuracy: 1.0000 - val_loss: 0.9744 - val_accuracy: 0.8042
+Epoch 18/30
+1920/1920 [==============================] - 1s 771us/sample - loss: 6.1171e-04 - accuracy: 1.0000 - val_loss: 0.9962 - val_accuracy: 0.8031
+Epoch 19/30
+1920/1920 [==============================] - 1s 775us/sample - loss: 4.5878e-04 - accuracy: 1.0000 - val_loss: 1.0174 - val_accuracy: 0.8083
+Epoch 20/30
+1920/1920 [==============================] - 1s 762us/sample - loss: 3.7101e-04 - accuracy: 1.0000 - val_loss: 1.0309 - val_accuracy: 0.8073
+Epoch 21/30
+1920/1920 [==============================] - 2s 786us/sample - loss: 2.9161e-04 - accuracy: 1.0000 - val_loss: 1.0475 - val_accuracy: 0.8062
+Epoch 22/30
+1920/1920 [==============================] - 2s 789us/sample - loss: 2.3492e-04 - accuracy: 1.0000 - val_loss: 1.0669 - val_accuracy: 0.8083
+Epoch 23/30
+1920/1920 [==============================] - 2s 785us/sample - loss: 2.5730e-04 - accuracy: 1.0000 - val_loss: 1.0876 - val_accuracy: 0.8073
+Epoch 24/30
+1920/1920 [==============================] - 1s 747us/sample - loss: 2.3953e-04 - accuracy: 1.0000 - val_loss: 1.1022 - val_accuracy: 0.8052
+Epoch 25/30
+1920/1920 [==============================] - 1s 764us/sample - loss: 2.4668e-04 - accuracy: 1.0000 - val_loss: 1.1165 - val_accuracy: 0.8073
+Epoch 26/30
+1920/1920 [==============================] - 1s 765us/sample - loss: 1.8870e-04 - accuracy: 1.0000 - val_loss: 1.1323 - val_accuracy: 0.8062
+Epoch 27/30
+1920/1920 [==============================] - 2s 793us/sample - loss: 1.8481e-04 - accuracy: 1.0000 - val_loss: 1.1467 - val_accuracy: 0.8094
+Epoch 28/30
+1920/1920 [==============================] - 1s 750us/sample - loss: 1.3891e-04 - accuracy: 1.0000 - val_loss: 1.1595 - val_accuracy: 0.8042
+Epoch 29/30
+1920/1920 [==============================] - 1s 742us/sample - loss: 1.2385e-04 - accuracy: 1.0000 - val_loss: 1.1694 - val_accuracy: 0.8042
+Epoch 30/30
+1920/1920 [==============================] - 1s 780us/sample - loss: 1.3303e-04 - accuracy: 1.0000 - val_loss: 1.1806 - val_accuracy: 0.8031
 
-Sentiment model accuracy: 76.00%
+Model accuracy: 81.83%
 
-Saved model to ./models/sentiment_model.h5
+10 correct predictions:
+   will never ever go back, 0.9983136653900146, True
+   nice ambiance, 1.0, False
+   excellent product, 0.9999998807907104, False
+   the dialogue sucked, 1.0, True
+   i am not impressed with this and i would not recommend this item to anyone, 0.9999642372131348, True
+   i found the product to be easy to set up and use, 0.9955804944038391, False
+   talk about useless customer service, 0.9999998807907104, True
+   because they not only have pathetic lines to speak but the director gave them no action, 0.9999978542327881, True
+   blue is easy to use, 0.9994624257087708, False
+   is nice and the fit is very the cut out for the face is a good, 0.9999997615814209, False
 
-Building category model.
-Building keras Sequential model with length of input: 17, labels length: 3
-Model: "model_1"
-_________________________________________________________________
-Layer (type)                 Output Shape              Param #
-=================================================================
-input_2 (InputLayer)         [(None, 17)]              0
-_________________________________________________________________
-embedding_1 (Embedding)      (None, 17, 128)           1280000
-_________________________________________________________________
-conv1d_3 (Conv1D)            (None, 17, 128)           16512
-_________________________________________________________________
-max_pooling1d_3 (MaxPooling1 (None, 17, 128)           0
-_________________________________________________________________
-conv1d_4 (Conv1D)            (None, 17, 128)           16512
-_________________________________________________________________
-max_pooling1d_4 (MaxPooling1 (None, 17, 128)           0
-_________________________________________________________________
-conv1d_5 (Conv1D)            (None, 17, 128)           16512
-_________________________________________________________________
-lstm_1 (LSTM)                (None, 64)                49408
-_________________________________________________________________
-tf_op_layer_ExpandDims_1 (Te [(None, 64, 1)]           0
-_________________________________________________________________
-max_pooling1d_5 (MaxPooling1 (None, 2, 1)              0
-_________________________________________________________________
-flatten_1 (Flatten)          (None, 2)                 0
-_________________________________________________________________
-dense_2 (Dense)              (None, 128)               384
-_________________________________________________________________
-dense_3 (Dense)              (None, 3)                 387
-=================================================================
-Total params: 1,379,715
-Trainable params: 1,379,715
-Non-trainable params: 0
-_________________________________________________________________
-Train on 1920 samples, validate on 480 samples
-Epoch 1/25
-1920/1920 [==============================] - 2s 1ms/sample - loss: 1.0984 - accuracy: 0.3406 - val_loss: 1.0993 - val_accuracy: 0.2854
-Epoch 2/25
-1920/1920 [==============================] - 1s 265us/sample - loss: 1.0927 - accuracy: 0.4151 - val_loss: 1.0915 - val_accuracy: 0.3917
-Epoch 3/25
-1920/1920 [==============================] - 1s 300us/sample - loss: 1.0409 - accuracy: 0.5682 - val_loss: 1.0201 - val_accuracy: 0.5083
-Epoch 4/25
-1920/1920 [==============================] - 1s 262us/sample - loss: 0.8809 - accuracy: 0.6313 - val_loss: 0.9073 - val_accuracy: 0.5229
-Epoch 5/25
-1920/1920 [==============================] - 1s 269us/sample - loss: 0.7027 - accuracy: 0.6589 - val_loss: 0.8582 - val_accuracy: 0.5271
-Epoch 6/25
-1920/1920 [==============================] - 1s 299us/sample - loss: 0.5975 - accuracy: 0.6781 - val_loss: 0.9088 - val_accuracy: 0.5375
-Epoch 7/25
-1920/1920 [==============================] - 1s 298us/sample - loss: 0.5346 - accuracy: 0.7380 - val_loss: 0.9006 - val_accuracy: 0.5583
-Epoch 8/25
-1920/1920 [==============================] - 1s 272us/sample - loss: 0.4994 - accuracy: 0.7708 - val_loss: 0.9472 - val_accuracy: 0.5583
-Epoch 9/25
-1920/1920 [==============================] - 1s 274us/sample - loss: 0.4772 - accuracy: 0.7958 - val_loss: 0.9911 - val_accuracy: 0.5625
-Epoch 10/25
-1920/1920 [==============================] - 0s 256us/sample - loss: 0.4657 - accuracy: 0.8161 - val_loss: 0.9827 - val_accuracy: 0.5813
-Epoch 11/25
-1920/1920 [==============================] - 1s 276us/sample - loss: 0.4250 - accuracy: 0.8370 - val_loss: 0.9895 - val_accuracy: 0.6000
-Epoch 12/25
-1920/1920 [==============================] - 1s 292us/sample - loss: 0.3632 - accuracy: 0.8729 - val_loss: 0.9928 - val_accuracy: 0.6396
-Epoch 13/25
-1920/1920 [==============================] - 1s 285us/sample - loss: 0.2757 - accuracy: 0.9177 - val_loss: 1.0056 - val_accuracy: 0.6562
-Epoch 14/25
-1920/1920 [==============================] - 1s 264us/sample - loss: 0.1935 - accuracy: 0.9474 - val_loss: 1.0165 - val_accuracy: 0.6833
-Epoch 15/25
-1920/1920 [==============================] - 1s 272us/sample - loss: 0.1423 - accuracy: 0.9615 - val_loss: 1.1448 - val_accuracy: 0.6750
-Epoch 16/25
-1920/1920 [==============================] - 1s 275us/sample - loss: 0.1092 - accuracy: 0.9646 - val_loss: 1.1832 - val_accuracy: 0.6812
-Epoch 17/25
-1920/1920 [==============================] - 1s 271us/sample - loss: 0.0917 - accuracy: 0.9714 - val_loss: 1.1058 - val_accuracy: 0.7167
-Epoch 18/25
-1920/1920 [==============================] - 1s 273us/sample - loss: 0.0709 - accuracy: 0.9802 - val_loss: 1.1449 - val_accuracy: 0.7000
-Epoch 19/25
-1920/1920 [==============================] - 0s 257us/sample - loss: 0.0563 - accuracy: 0.9885 - val_loss: 1.1453 - val_accuracy: 0.7125
-Epoch 20/25
-1920/1920 [==============================] - 1s 284us/sample - loss: 0.0462 - accuracy: 0.9901 - val_loss: 1.1866 - val_accuracy: 0.7208
-Epoch 21/25
-1920/1920 [==============================] - 1s 267us/sample - loss: 0.0360 - accuracy: 0.9932 - val_loss: 1.3464 - val_accuracy: 0.6979
-Epoch 22/25
-1920/1920 [==============================] - 1s 297us/sample - loss: 0.0337 - accuracy: 0.9917 - val_loss: 1.2439 - val_accuracy: 0.7104
-Epoch 23/25
-1920/1920 [==============================] - 1s 273us/sample - loss: 0.0334 - accuracy: 0.9922 - val_loss: 1.3795 - val_accuracy: 0.7042
-Epoch 24/25
-1920/1920 [==============================] - 1s 283us/sample - loss: 0.0276 - accuracy: 0.9943 - val_loss: 1.3175 - val_accuracy: 0.7146
-Epoch 25/25
-1920/1920 [==============================] - 1s 261us/sample - loss: 0.0222 - accuracy: 0.9943 - val_loss: 1.3274 - val_accuracy: 0.7229
+10 incorrect predictions:
+   the menu had so much good stuff on it i could not, 0.9999562501907349, True
+   to them with the touch buttons if you touch the phone to your face while listening, 0.9978283047676086, False
+   go rent it, 0.9970032572746277, True
+   holding the series together were the amazing performances of and as the two in quiet conflict, 0.9964361190795898, False
+   an cartoon crafted by paul for people who can't anything but the in a picture with, 0.9999982118606567, False
+   most expected things happen and by the time the film is over you might be far, 0.9960846900939941, False
+   mouth you expect to hear you see kids the plug was a for this horrible show, 0.9991859793663025, False
+   but this movie really got to me, 0.9999910593032837, True
+   the soundtrack wasn't terrible either, 1.0, True
+   its a total, 0.999937891960144, True
 
-Category model accuracy: 73.50%
+10 confused predictions:
+   it's just painful, 0.49760669469833374, False
+   an underwhelming relationship where both can't wait for the other person to ask to break up, 0.3142818808555603, False
+   this will never see another from me, 0.5442490577697754, False
+   that just in my book also pretty rare here in vegas, 0.663110613822937, True
+   it presents a yet serious portrayal of the ups and of the characters, 0.35509273409843445, True
+   you want a movie that's not gross but gives you some this is a great choice, 0.6467203497886658, True
+   a truly truly bad film, 0.62550288438797, False
+   service, 0.5468497276306152, False
+   food was so, 0.45637306571006775, True
+   was less, 0.5294061899185181, False
 
-Saved model to ./models/category_model.h5
+sentimentless predictions:
+   The brown fox jumped over the dog.: [0.40193803 0.6087881 ]
+   Former United States president Lyndon Johnson gave interviews from the bathroom.: [0.25085962 0.7632345 ]
+   McDonald's once made bubblegum-flavored broccoli.: [0.23836833 0.7570576 ]
+   The United States government would poison alcohol during the pohibition.: [0.845752   0.15978621]
+   A cow bison hybrid is called a 'beefalo'.: [0.10792049 0.8909185 ]
+   Samsung tests phone durability with a butt-shaped robot.: [9.991848e-06 9.999918e-01]
+   Tissues made by Kleenuz were allegedly originally intended for gas masks.: [9.9999952e-01 1.0040055e-06]
+   Blue whales eat half a million calories in one mouthful.: [9.9999774e-01 4.0784398e-06]
+   George Washington opened a whiskey distillery after his presidency.: [2.4073491e-04 9.9980587e-01]
+   Thanks to 3D-printing, NASA can essentially email tools to astronauts in space.: [0.11622166 0.8822723 ]
+   There were active volcanoes on the moon when dinosaurs were alive.: [0.45332198 0.54667798]
+   The United States government has a database of every single public tweet from 2006 to 2017.: [2.228432e-05 9.999747e-01]
+   A woman was elected to congress before women could vote.: [0.9975853 0.0028403]
+   Ketchup was sold as medicine in the 1830s.: [0.99176896 0.0089036 ]
+   A Pixar employee once accidentally deleted a squeunce of the Toy Story 2 during its production.: [9.999771e-01 3.215015e-05]
+   Women were banned in New York from smoking in public during the early 1900s.: [0.36048672 0.64207805]
+   Baseball umpires used to sit in rocking chairs back in the 19th century.: [0.5288267 0.4848737]
+   The Olympics used to award medals for art.: [5.4174952e-06 9.9999404e-01]
+   Champagne that is 170 years old have been found on the bottom of the Baltic Sea traveling from Germany to Russia.: [0.06441134 0.93376493]
+   The only letter that does not appear in the English periodic table is J.: [9.9999917e-01 1.7556588e-06]
+
+Saved model to /root/school/ece5268/NN-text-classification/src/../models/model.h5 and /root/school/ece5268/NN-text-classification/src/../models/model.png
+
+
+Saved plot to /root/school/ece5268/NN-text-classification/src/../plots/AvL-77.75%-evaluation.png
