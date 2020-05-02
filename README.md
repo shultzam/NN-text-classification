@@ -34,3 +34,20 @@ As mentioned before, I expected to be able to classify reviews sentiments as pos
 - N.A. (N.D.). TensorFlow. Retrieved from http://www.tensorflow.org
 - Kassabgi, G. (Jan 16, 2017). Text Classification using Neural Networks. Retrieved from https://machinelearnings.co/text-classification-using-neural-networks-f5cd7b8765c6
 
+# Usage
+## Importing/Installing Modules
+1. Install Python3
+   * Python 3.7.5 was used but any version of Python3 should work.
+2. Install Pip3.
+3. Install required modules via requirements.txt in this project:
+   * pip3 install -r requirements.txt
+   * NOTE: If this fails, try installing graphviz via 'apt-get install graphviz' before the additional packages listed in requirements.txt 
+
+## Running
+1. Clone this repo. The master branch is usually the most stable.
+2. Navigate to the src directory.
+3. Execute via:
+   * './main.py'
+   * NOTE: There are two optional parameters that can be used individually or simultaneously:
+      - model: overwrite the model files in the models directory.
+      - plot: plot the fitting Accuracy vs Loss plots and save them to the plots directory.
