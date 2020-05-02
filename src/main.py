@@ -1,11 +1,17 @@
 #!/usr/bin/python3
 
+import numpy as np
+# Set the seed for reproducibility.
+np.random.seed(1337)
+
 import os
 import sys
 from dataset_functions import *
 from model_functions import *
 from tensorflow.keras import backend as kback
-import numpy as np
+
+# Used to create a pretty table.
+import texttable as tt
 
 '''
 Created using Python 3.7.5, TensorFlow 2.0.1 and keras 2.2.4.
@@ -42,7 +48,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 #    dataset[1] - list containing review texts (validate set)
 #    dataset[2] - list containing review categories as numpy categoricals (training set)
 #    dataset[3] - list containing review categories as numpy categoricals (validate set)
-dataset, maxTokens, validateReviewsText, sentenceData = read_dataset_into_memory()
+dataset, maxTokens, validateReviewsText, predictionData = read_dataset_into_memory()
 
 #####################
 # Train, test and evaluate the model.
@@ -57,7 +63,7 @@ model.summary()
 # Fit the sentiment model and test it against the test data.
 #   - epochs    : the number of iterations over the entire x and y datas to train the model.
 #   - batch_size: the number of samples per gradient update.
-history = model.fit(x=dataset[0], y=dataset[2], validation_split=0.2, epochs=30, batch_size=128)
+history = model.fit(x=dataset[0], y=dataset[2], validation_split=0.2, epochs=30, batch_size=128, shuffle=False)
 
 # Determine the accuracy of the sentiment model. loss is stored  at [0].
 accuracy = model.evaluate(dataset[1], dataset[3], verbose=0)[1]
@@ -72,31 +78,54 @@ predictions = model.predict(dataset[1])
 
 # Collect the predictions for 10 reviews that were very correct, very incorrect and very confusing to the model.
 # Split down the middle if possible for positive/negative sentiment.
-correctList, incorrectList, confusingList = gather_interesting_reviews(predictions,
+reviewsList, predictionsList, actualsList = gather_interesting_reviews(predictions,
                                                                        validateReviewsText,
                                                                        dataset[3])
 
-print('\n{} correct predictions:'.format(len(correctList)))
-for item in correctList:
-   print('   {}, {}, {}'.format(item.text, item.confidence, item.sentiment))
-   
-print('\n{} incorrect predictions:'.format(len(incorrectList)))
-for item in incorrectList:
-   print('   {}, {}, {}'.format(item.text, item.confidence, item.sentiment))
+# Format the interesting predictions table and print it.
+prettyTable = tt.Texttable()
+headings = ['', 'Tokenized Review', 'Predictions (F/T)', 'Actual']
+prettyTable.header(headings)
+indexList = list(range(1, len(reviewsList) + 1))
 
-print('\n{} confused predictions:'.format(len(confusingList)))
-for item in confusingList:
-   print('   {}, {}, {}'.format(item.text, item.confidence, item.sentiment))
+# Add some spacing lines.
+indexList.insert(10, '')
+indexList.insert(20, '')
+reviewsList.insert(10, '')
+reviewsList.insert(20, '')
+predictionsList.insert(10, '')
+predictionsList.insert(20, '')
+actualsList.insert(10, '')
+actualsList.insert(20, '')
+
+# Zip the lists.
+rows = zip(indexList, reviewsList, predictionsList, actualsList)
+for row in rows:
+   prettyTable.add_row(row)
+
+# Draw the table.
+print('\nSome interesting results:')
+print(prettyTable.draw())
 
 #####################
-# Use the model to make predictions on a set of reviews carefully crafted to lack any sentiment.
+# Use the model to make some additional predictions.
 #####################
 
 # Allow the model to predict against each input.
-predictions = model.predict(sentenceData[0])
-print('\nsentimentless predictions:')
-for index in range(0, len(predictions)):
-   print('   {}: {}'.format(sentenceData[1][index], predictions[index]))
+predictions = model.predict(predictionData[0])
+
+# Format the interesting predictions table and print it.
+prettyTable = tt.Texttable()
+headings = ['', 'Sentence', 'Predictions (F/T)']
+prettyTable.header(headings)
+indexList = list(range(1, len(predictions) + 1))
+
+# Zip the lists.
+for row in zip(indexList, predictionData[1], predictions):
+   prettyTable.add_row(row)
+
+print('\nAdditional predictions:')
+print(prettyTable.draw())
 
 #####################
 # If prompted, save the model image and plot.
